@@ -435,8 +435,15 @@ void callPatterns()
     }
   }
 
+  #if POSITION_CTRL
+    mask_by_position();
+  #endif
+  #if IR_CTRL
+    mask_by_IR();
+  #endif
+
   // send the 'leds' array out to the actual LED strip
-  FastLED.show();  
+  FastLED.show();
   // insert a delay to keep the framerate modest
   FastLED.delay(1000/FRAMES_PER_SECOND); 
 
@@ -446,6 +453,105 @@ void callPatterns()
 
 
 }
+
+void mask_by_IR()
+{
+  // find masking section size
+  int chunk_sz = NUM_LEDS / max(IR_CNT, 1);
+  
+  // make mask
+  uint8_t tdx;
+  for (tdx = 0; tdx < IR_CNT; tdx++) 
+  {
+    int st_idx = (tdx * chunk_sz) - (chunk_sz / 2);
+    int en_idx = (tdx * chunk_sz) + (chunk_sz / 2);
+    // un-mask
+    if (z_pos[tdx] < IR_ACT_Z_DIST && z_pos[tdx] > IR_ACT_Z_ERR_DIST)
+    {
+      LEDFillMask(st_idx, en_idx, true);
+    }
+    // mask
+    else
+    {
+      LEDFillMask(st_idx, en_idx, false);
+    }
+  }
+
+  // apply mask
+  LEDApplyMask();
+}
+
+// set length mask based on position sensor
+void mask_by_position()
+{
+  int end_idx = (NUM_LEDS*linVal)/(1<<ANLG_RES);
+  LEDFillMask(0, end_idx, true);
+  LEDFillMask(end_idx+1, NUM_LEDS, false);
+  LEDApplyMask();
+}
+
+void LEDFillMask(int start_idx, int end_idx, bool onoff)
+{
+  start_idx = max(start_idx, 0);
+  end_idx = min(end_idx, NUM_LEDS);
+  while (start_idx < end_idx)
+    ledMask[start_idx++] = onoff;
+}
+
+void LEDApplyMask()
+{
+  int idx;
+  for (idx = 0; idx < NUM_LEDS; idx++ )
+  {
+    if (!ledMask[idx])
+    {
+      // set black
+      leds[idx] = mask_color;
+    }
+  }  
+}
+
+void FastLEDShowMask()
+{
+  // copy leds
+  memcpy(ledbuffer, leds, NUM_LEDS * sizeof(CRGB));
+
+  // fill leds with mask
+  int idx;
+  for (idx = 0; idx < NUM_LEDS; idx++ )
+  {
+    if (!ledMask[idx])
+    {
+      // set black
+      leds[idx] = mask_color;
+    }
+  }  
+  
+  // show leds
+  FastLED.show();  
+  
+  // restore leds
+  memcpy(leds, ledbuffer, NUM_LEDS * sizeof(CRGB));
+}
+
+// ================================================================
+// Function: changeBrightness
+// Description: Change Brightness
+// ================================================================
+void changeBrightness()
+{
+  myBrightness=fsrVal;
+  #ifdef OUTPUT_READABLE      
+    Serial.println("------ MY BRIGHTNESS ------");
+  #endif
+  if(myBrightness<0) myBrightness=0;
+  if(myBrightness>780) myBrightness=780;
+  myBrightness=map(myBrightness,0,780,10,255);
+  #ifdef OUTPUT_READABLE
+    Serial.println(myBrightness);
+    Serial.println("---------------------------");
+  #endif
+}  //  changeBrightness  /
 
 void nextPattern()
 {

@@ -3,6 +3,12 @@
 #define NUM_LEDS    169
 #include <FastLED.h>
 
+#define PRESSURE_CTRL     2
+#define POSITION_CTRL     0
+#define IR_CTRL           0
+#define IR_ACT_Z_DIST     20
+#define IR_ACT_Z_ERR_DIST 0
+
 CRGB leds[NUM_LEDS];        // Place for final LED buffer at end of each cycle
 CRGB LED_BUFFER[NUM_LEDS];      // volatile LED buffer for pushing/poping
 CRGB tickOverlay[NUM_LEDS]; // Create tick overlay
@@ -10,6 +16,9 @@ CRGB drumKitOverlay[NUM_LEDS];  // Drumkit sprite buffer
 CRGB ARGBOverlay[NUM_LEDS];  // ARGB sprite buffer
 CRGB funfettiOverlay[NUM_LEDS];  // wiper buffer
 CRGB bellOverlay[NUM_LEDS];  // Drumkit sprite buffer.0
+CRGB ledbuffer[NUM_LEDS];  // buffer for per show operations
+bool ledMask[NUM_LEDS];  // buffer for masked to BLACK LEDs
+CRGB mask_color = CRGB(0,0,0);
 
 // colored dots that pulse for drums
 CRGBPalette16 drumPalette = RainbowColors_p; // Choose a color palette
@@ -22,6 +31,7 @@ CRGBPalette16 gPal; // https://github.com/FastLED/FastLED/wiki/Gradient-color-pa
 #define FRAMES_PER_SECOND  120
 //#define FRAMES_PER_SECOND  240
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+int myBrightness=0;
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 // The order in which you declare things is the order of layering from bottom to top

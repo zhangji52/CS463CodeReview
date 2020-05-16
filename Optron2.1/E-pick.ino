@@ -43,8 +43,10 @@ void readPick() {
   count = 0;
   randnum = random(-100,100);
   if(randnum > 20){
-    Serial.println("High end broken!");
-    Serial.println(randnum);
+    #ifdef OUTPUT_READABLE
+      Serial.println("High end broken!");
+      Serial.println(randnum);
+    #endif
     PeakHandler(randnum);
     
     //Old implementation
@@ -57,8 +59,10 @@ void readPick() {
     //delay(1000)
   }
   else if(randnum < -20){
-    Serial.println("Low end broken!");
-    Serial.println(randnum);
+    #ifdef OUTPUT_READABLE
+      Serial.println("Low end broken!");
+      Serial.println(randnum);
+    #endif
     TroughHandler(randnum);
     
     //Old implementation
@@ -71,8 +75,10 @@ void readPick() {
     //delay(1000);
   }
   else{
-      Serial.println("Threshold intact!");
-      Serial.println(randnum);
+      #ifdef OUTPUT_READABLE
+        Serial.println("Threshold intact!");
+        Serial.println(randnum);
+      #endif
   }
 }
 
@@ -88,7 +94,9 @@ void  PeakHandler(int input){
   //New implementation
   while(input > 20){
     avg = 0;
-    Serial.println(input);
+    #ifdef OUTPUT_READABLE
+      Serial.println(input);
+    #endif
     if(count < 5){ /*This count variable is used to count the number of integers that exist within the Peak array. This value is used to calculate the average of said array.*/
       count = count + 1;
     }
@@ -105,8 +113,10 @@ void  PeakHandler(int input){
     Peak[0] = input;
     avg = avg + input;
     avg = avg/count;
-    Serial.println("Average");
-    Serial.println(avg);
+    #ifdef OUTPUT_READABLE
+      Serial.println("Average");
+      Serial.println(avg);
+    #endif
     if(input >= avg){
       peak = input;  
     }
@@ -171,7 +181,9 @@ void TroughHandler(int input){
 //New implementation
   while(input < -20){
     avg = 0;
-    Serial.println(input);
+    #ifdef OUTPUT_READABLE
+      Serial.println(input);
+    #endif    
     if(count < 5){/*This count variable is used to count the number of integers that exist within the Peak array. This value is used to calculate the average of said array.*/
       count = count + 1;
     }
@@ -188,8 +200,10 @@ void TroughHandler(int input){
     Trough[0] = input;
     avg = avg + input;
     avg = avg/count;
-    Serial.println("Average");
-    Serial.println(avg);
+    #ifdef OUTPUT_READABLE
+      Serial.println("Average");
+      Serial.println(avg);
+    #endif
     if(input >= avg){
       trough = input;  
     }
